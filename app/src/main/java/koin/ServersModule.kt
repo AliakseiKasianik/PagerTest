@@ -1,24 +1,34 @@
 package koin
 
+import Const.API_KEY_HEADER
 import Const.NEWS_API_KEY
 import Const.SERVER_URL
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.qualifier.StringQualifier
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 internal val serversModule = module {
 
-    single { headerInterceptor() }
+    single(InterceptorQualifier.header) { headerKeyInterceptor() }
+    single(InterceptorQualifier.logging) { provideLoggingInterceptor() }
 
     single {
         provideRetrofit(
-            client = provideOkHttpClient(interceptor = get()),
+            client = provideOkHttpClient(
+                interceptors = listOf(
+                    get(InterceptorQualifier.header),
+                    get(InterceptorQualifier.logging)
+                )
+            ),
             baseUrl = SERVER_URL
         )
     }
@@ -46,26 +56,33 @@ private fun createGsonFactory(): GsonConverterFactory {
 
 private const val TIMEOUT = 30L
 fun provideOkHttpClient(
-    interceptor: Interceptor
+    interceptors: List<Interceptor>? = null
 ): OkHttpClient {
     return OkHttpClient.Builder()
         .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
         .readTimeout(TIMEOUT, TimeUnit.SECONDS)
         .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
-        .addInterceptor(interceptor)
         .retryOnConnectionFailure(true)
+        .apply { interceptors?.forEach { addInterceptor(it) } }
         .build()
 }
 
-fun headerInterceptor(): Interceptor =
+fun headerKeyInterceptor(): Interceptor =
     Interceptor { chain ->
-        val request = chain.request()
-        val newUrl = request.url.newBuilder()
-            .addQueryParameter("X-Api-Key", NEWS_API_KEY)
-            .build()
-
-        val newRequest = request.newBuilder()
-            .url(newUrl)
+        val newRequest = chain.request().newBuilder()
+            .addHeader(API_KEY_HEADER, NEWS_API_KEY)
             .build()
         chain.proceed(newRequest)
     }
+
+//Not working http logger
+private fun provideLoggingInterceptor(): Interceptor {
+    val logger = HttpLoggingInterceptor.Logger { message -> Timber.d("OkHttp -> $message") }
+    return HttpLoggingInterceptor(logger)
+        .apply { level = HttpLoggingInterceptor.Level.BODY }
+}
+
+object InterceptorQualifier {
+    val logging = StringQualifier("logging")
+    val header = StringQualifier("header")
+}

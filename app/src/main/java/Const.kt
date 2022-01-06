@@ -1,5 +1,6 @@
 object Const {
 
-    val NEWS_API_KEY = "a3aebd96c7c94de09b552a2aee1675d4"
-    val SERVER_URL = "https://newsapi.org"
+    const val NEWS_API_KEY = "fbf18cd9719746bcb09894261cd04699"
+    const val SERVER_URL = "https://newsapi.org"
+    const val API_KEY_HEADER = "X-Api-Key"
 }

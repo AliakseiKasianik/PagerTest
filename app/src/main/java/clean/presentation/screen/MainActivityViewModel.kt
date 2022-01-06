@@ -10,9 +10,7 @@ import clean.domain.GetNewsUseCase
 import clean.domain.News
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.subjects.BehaviorSubject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 
 class MainActivityViewModel(
     private val getNewsUseCase: GetNewsUseCase
@@ -20,7 +18,7 @@ class MainActivityViewModel(
 
     @ExperimentalCoroutinesApi
     override val news: Flowable<PagingData<News>> =
-        Pager(PagingConfig(pageSize = 10), pagingSourceFactory = {
+        Pager(PagingConfig(pageSize = 20, enablePlaceholders = false), pagingSourceFactory = {
             NewsPagingSource(getNewsUseCase)
         }).flowable.map { pagingData -> pagingData.mapAsync { Single.just(it) } }
 }
