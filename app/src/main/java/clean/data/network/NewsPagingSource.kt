@@ -1,6 +1,5 @@
 package clean.data.network
 
-import android.util.Log
 import androidx.paging.PagingState
 import androidx.paging.rxjava3.RxPagingSource
 import clean.domain.GetNewsUseCase
@@ -22,24 +21,16 @@ class NewsPagingSource(private val getNewsUseCase: GetNewsUseCase) : RxPagingSou
         val pageNumber = params.key ?: 1
         val pageSize = params.loadSize
 
-        Log.e("QQQ", pageNumber.toString() + " pageNumber")
-        Log.e("QQQ", pageSize.toString() + " pageSize")
-
         return getNewsUseCase("Kotlin", pageNumber, pageSize)
             .subscribeOn(Schedulers.io())
             .map { toResult(it, pageNumber) }
-            .onErrorReturn {
-                Log.e("QQQ", it.message .toString() + " error")
-                Log.e("QQQ", it.suppressed .toString() + " error")
-                Log.e("QQQ", it.stackTrace .toString() + " error")
-                LoadResult.Error(it) }
+            .onErrorReturn { LoadResult.Error(it) }
     }
 
     private fun toResult(
         response: Response,
         pageNumber: Int
     ): LoadResult<Int, News> {
-        Log.e("QQQ", response.toString() +  "to result")
         val news = response.listNews
         val nextPageNumber = if (news.isEmpty()) null else pageNumber + 1
         val prevPageNumber = if (pageNumber > 1) pageNumber - 1 else null

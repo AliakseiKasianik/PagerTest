@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -66,6 +67,11 @@ dependencies {
     implementation rootProject.ext.dependencies.pagingKtx
     implementation rootProject.ext.dependencies.pagingRx
     implementation rootProject.ext.dependencies.coil
+
+    implementation rootProject.ext.dependencies.room
+    kapt rootProject.ext.dependencies.compiler
+    implementation rootProject.ext.dependencies.roomRxJava
+    implementation rootProject.ext.dependencies.roomPaging
 
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'

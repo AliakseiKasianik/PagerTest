@@ -51,10 +51,18 @@ ext {
 
     dependencies.timber = 'com.jakewharton.timber:timber:4.7.1'
 
-
     dependencies.paging = 'androidx.paging:paging-runtime:3.1.0'
     dependencies.pagingKtx = 'androidx.paging:paging-runtime-ktx:3.1.0'
     dependencies.pagingRx = 'androidx.paging:paging-rxjava3:3.1.0'
 
     dependencies.coil = 'io.coil-kt:coil:1.2.1'
+
+    dependencies.room = "androidx.room:room-runtime:2.4.0"
+    dependencies.compiler = "androidx.room:room-compiler:2.4.0"
+
+    // optional - RxJava3 support for Room
+    dependencies.roomRxJava = "androidx.room:room-rxjava3:2.4.0"
+
+    // optional - Paging 3 Integration
+    dependencies.roomPaging = "androidx.room:room-paging:2.4.0"
 }

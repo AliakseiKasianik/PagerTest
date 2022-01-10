@@ -8,6 +8,6 @@ import clean.presentation.screen.MainActivityViewModel
 internal val activityModule = module {
 
     viewModel<BaseMainActivityViewModel> {
-        MainActivityViewModel(getNewsUseCase = get())
+        MainActivityViewModel(getNewsUseCase = get(), databaseRepo = get())
     }
 }

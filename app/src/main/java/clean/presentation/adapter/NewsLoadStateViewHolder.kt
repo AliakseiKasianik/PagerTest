@@ -1,6 +1,5 @@
 package clean.presentation.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -19,7 +18,6 @@ class NewsLoadStateViewHolder(
     }
 
     fun bind(loadState: LoadState) {
-        Log.e("QQQ", loadState.toString())
         with(binding) {
 
             if (loadState is LoadState.Error) {
