@@ -5,24 +5,28 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.rxjava3.RxRemoteMediator
 import app.AppDatabase
+import clean.data.database.api.NewsDao
+import clean.data.database.api.RemoteKeysDao
 import clean.data.database.model.NewsDb
 import clean.data.database.model.RemoteKeys
 import clean.data.mappers.mapToNewsDb
 import clean.data.repository.NetworkNewsRepository
 import clean.domain.model.News
+import clean.domain.repository.NewsRepository
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.InvalidObjectException
 
 @OptIn(ExperimentalPagingApi::class)
 class NewsRemoteMediator(
-    private val networkRepo: NetworkNewsRepository,
-    private val databaseRepo: AppDatabase
-) : RxRemoteMediator<Int, News>() {
+    private val networkRepo: NewsRepository,
+    private val newsDao: NewsDao,
+    private val remoteKeysDao: RemoteKeysDao
+) : RxRemoteMediator<Int, NewsDb>() {
 
     override fun loadSingle(
         loadType: LoadType,
-        state: PagingState<Int, News>
+        state: PagingState<Int, NewsDb>
     ): Single<MediatorResult> {
 
         return Single.just(loadType)
@@ -34,14 +38,14 @@ class NewsRemoteMediator(
                         remoteKeys?.nextKey?.minus(1) ?: STARTING_PAGE_NUMBER
                     }
                     LoadType.PREPEND -> {
-                        val remoteKeys = getRemoteKeyForFirstItem(state)
-                            ?: throw InvalidObjectException("Result is empty")
-                        remoteKeys.prevKey ?: INVALID_PAGE
+                        val remoteKeys = getRemoteKeyForFirstItem(state)/*
+                            ?: throw InvalidObjectException("Result is empty")*/
+                        remoteKeys?.prevKey ?: INVALID_PAGE
                     }
                     LoadType.APPEND -> {
-                        val remoteKeys = getRemoteKeyForLastItem(state)
-                            ?: throw InvalidObjectException("Result is empty")
-                        remoteKeys.nextKey ?: INVALID_PAGE
+                        val remoteKeys = getRemoteKeyForLastItem(state)/*
+                            ?: throw InvalidObjectException("Result is empty")*/
+                        remoteKeys?.nextKey ?: INVALID_PAGE
                     }
                 }
             }.flatMap { page ->
@@ -60,39 +64,39 @@ class NewsRemoteMediator(
 
     private fun insertToDb(page: Int, loadType: LoadType, data: List<NewsDb>): List<NewsDb> {
         if (loadType == LoadType.REFRESH) {
-            databaseRepo.remoteKeysDao().clearRemoteKeys()
-            databaseRepo.newsDao().clearDb()
+            remoteKeysDao.clearRemoteKeys()
+            newsDao.clearDb()
         }
         val prevKey = if (page == STARTING_PAGE_NUMBER) null else page - 1
         val nextKey = if (data.isEmpty()) null else page + 1
         val keys = data.map {
             RemoteKeys(repoId = it.newsId, prevKey = prevKey, nextKey = nextKey)
         }
-        databaseRepo.remoteKeysDao().insertAll(keys)
-        databaseRepo.newsDao().insertNews(data)
+        remoteKeysDao.insertAll(keys)
+        newsDao.insertNews(data)
         return data
     }
 
-    private fun getRemoteKeyForLastItem(state: PagingState<Int, News>): RemoteKeys? {
+    private fun getRemoteKeyForLastItem(state: PagingState<Int, NewsDb>): RemoteKeys? {
         return state.pages.lastOrNull() { it.data.isNotEmpty() }?.data?.lastOrNull()
             ?.let { repo ->
-                databaseRepo.remoteKeysDao().remoteKeysRepoId(repo.id)
+                remoteKeysDao.remoteKeysRepoId(repo.newsId)
             }
     }
 
-    private fun getRemoteKeyForFirstItem(state: PagingState<Int, News>): RemoteKeys? {
+    private fun getRemoteKeyForFirstItem(state: PagingState<Int, NewsDb>): RemoteKeys? {
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
             ?.let { repo ->
-                databaseRepo.remoteKeysDao().remoteKeysRepoId(repo.id)
+                remoteKeysDao.remoteKeysRepoId(repo.newsId)
             }
     }
 
     private fun getRemoteKeyClosestToCurrentPosition(
-        state: PagingState<Int, News>
+        state: PagingState<Int, NewsDb>
     ): RemoteKeys? {
         return state.anchorPosition?.let { position ->
-            state.closestItemToPosition(position)?.id?.let { repoId ->
-                databaseRepo.remoteKeysDao().remoteKeysRepoId(repoId)
+            state.closestItemToPosition(position)?.newsId?.let { repoId ->
+                remoteKeysDao.remoteKeysRepoId(repoId)
             }
         }
     }

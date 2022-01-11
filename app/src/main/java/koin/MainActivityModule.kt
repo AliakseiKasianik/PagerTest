@@ -9,8 +9,7 @@ internal val activityModule = module {
 
     viewModel<BaseMainActivityViewModel> {
         MainActivityViewModel(
-            databaseRepo = get(),
-            newsRemoteMediator = get()
+            repository = get()
         )
     }
 }
