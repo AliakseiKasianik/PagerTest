@@ -3,7 +3,7 @@ package clean.presentation.adapter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import androidx.recyclerview.widget.RecyclerView
-import clean.domain.News
+import clean.domain.model.News
 import coil.load
 import com.itexus.pagertest.databinding.ItemNewsBinding
 

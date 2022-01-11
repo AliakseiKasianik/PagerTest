@@ -1,10 +1,10 @@
 package clean.data.repository
 
+import androidx.paging.PagingSource
 import clean.data.database.api.NewsDao
 import clean.data.database.model.NewsDb
-import clean.domain.NewsDatabaseRepository
+import clean.domain.repository.NewsDatabaseRepository
 import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Observable
 
 data class RoomNewsRepository(private val dao: NewsDao): NewsDatabaseRepository {
     override fun insertNews(news: List<NewsDb>): Completable {
@@ -15,7 +15,7 @@ data class RoomNewsRepository(private val dao: NewsDao): NewsDatabaseRepository 
         return dao.clearDb()
     }
 
-    override fun getNews(): Observable<List<NewsDb>> {
+    override fun getNews(): PagingSource<Int, NewsDb> {
         return dao.getNews()
     }
 }

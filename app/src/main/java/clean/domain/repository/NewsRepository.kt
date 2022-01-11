@@ -1,5 +1,6 @@
-package clean.domain
+package clean.domain.repository
 
+import clean.domain.model.Response
 import io.reactivex.rxjava3.core.Single
 
 interface NewsRepository {

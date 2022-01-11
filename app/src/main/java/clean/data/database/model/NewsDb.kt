@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "News")
 data class NewsDb(
 
-    @PrimaryKey(autoGenerate = true)
-    val newsId: Long? = null,
+    @PrimaryKey
+    val newsId: String,
 
     @Embedded
     val source: SourceDb?,

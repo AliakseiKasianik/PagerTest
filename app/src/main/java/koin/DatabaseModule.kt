@@ -3,7 +3,7 @@ package koin
 import androidx.room.Room
 import app.AppDatabase
 import clean.data.repository.RoomNewsRepository
-import clean.domain.NewsDatabaseRepository
+import clean.domain.repository.NewsDatabaseRepository
 import org.koin.android.ext.koin.androidApplication
 import org.koin.dsl.module
 
@@ -21,4 +21,6 @@ val databaseModule = module {
     single<NewsDatabaseRepository> { RoomNewsRepository(dao = get()) }
 
     single { get<AppDatabase>().newsDao() }
+
+    single { get<AppDatabase>().remoteKeysDao() }
 }

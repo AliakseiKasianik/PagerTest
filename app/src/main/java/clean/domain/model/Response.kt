@@ -1,4 +1,4 @@
-package clean.domain
+package clean.domain.model
 
 data class Response(
     val status: String,

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import clean.domain.News
+import clean.domain.model.News
 import com.itexus.pagertest.databinding.ItemNewsBinding
 
 class HomeNewsAdapter :

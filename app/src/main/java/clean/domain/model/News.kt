@@ -1,6 +1,7 @@
-package clean.domain
+package clean.domain.model
 
 data class News(
+    val id: String,
     val source: Source?,
     val title: String,
     val url: String?,

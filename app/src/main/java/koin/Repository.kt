@@ -1,9 +1,9 @@
 package koin
 
-import clean.data.repository.NewsRepositoryImpl
-import clean.domain.NewsRepository
+import clean.data.repository.NetworkNewsRepository
+import clean.domain.repository.NewsRepository
 import org.koin.dsl.module
 
 internal val repositoryModule = module {
-    single<NewsRepository> { NewsRepositoryImpl(api = get()) }
+    single<NewsRepository> { NetworkNewsRepository(api = get()) }
 }
