@@ -1,5 +1,6 @@
 package clean.data
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -40,35 +41,48 @@ class NewsRemoteMediator(
                     LoadType.PREPEND -> {
                         val remoteKeys = getRemoteKeyForFirstItem(state)/*
                             ?: throw InvalidObjectException("Result is empty")*/
+                        Log.e("AAA", remoteKeys.toString() + "prepend")
                         remoteKeys?.prevKey ?: INVALID_PAGE
                     }
                     LoadType.APPEND -> {
                         val remoteKeys = getRemoteKeyForLastItem(state)/*
                             ?: throw InvalidObjectException("Result is empty")*/
+                        Log.e("AAA", remoteKeys.toString() + "apend")
                         remoteKeys?.nextKey ?: INVALID_PAGE
                     }
                 }
             }.flatMap { page ->
                 if (page == INVALID_PAGE) {
-                    Single.just(MediatorResult.Success(endOfPaginationReached = true))
+                    Log.e("QQQ", page.toString() + " page")
+                    Single.just(MediatorResult.Error(InvalidObjectException("cmkjsnkcjdsn-=")))
                 } else {
                     networkRepo.getNews("Kotlin", page, state.config.pageSize)
-                        .map { response -> response.listNews.map { it.mapToNewsDb() } }
+                        .map { response ->
+                            Log.e("QQQ", response.toString() + " page")
+                            response.listNews.map { it.mapToNewsDb() } }
                         .map { insertToDb(page, loadType, it) }
-                        .map<MediatorResult> { MediatorResult.Success(endOfPaginationReached = it.isEmpty()) }
-                        .onErrorReturn { MediatorResult.Error(it) }
+                        .map<MediatorResult> {
+                            Log.e("AAA"," adclsdc " + it.toString())
+                            MediatorResult.Success(endOfPaginationReached = it.isEmpty()) }
+                        .onErrorReturn {
+                            Log.e("AAA", it.toString())
+                            MediatorResult.Error(it) }
                 }
             }
     }
 
 
     private fun insertToDb(page: Int, loadType: LoadType, data: List<NewsDb>): List<NewsDb> {
+        Log.e("AAA",  " insert")
         if (loadType == LoadType.REFRESH) {
+            Log.e("AAA", loadType.toString() + " loadType")
             remoteKeysDao.clearRemoteKeys()
             newsDao.clearDb()
         }
         val prevKey = if (page == STARTING_PAGE_NUMBER) null else page - 1
         val nextKey = if (data.isEmpty()) null else page + 1
+        Log.e("AAA", prevKey.toString() + " prevKey")
+        Log.e("AAA", nextKey.toString() + " nextKey")
         val keys = data.map {
             RemoteKeys(repoId = it.newsId, prevKey = prevKey, nextKey = nextKey)
         }

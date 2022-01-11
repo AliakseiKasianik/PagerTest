@@ -12,10 +12,10 @@ import io.reactivex.rxjava3.core.Completable
 interface NewsDao {
 
     @Insert(onConflict = REPLACE)
-    fun insertNews(news: List<NewsDb>): Completable
+    fun insertNews(news: List<NewsDb>)
 
     @Query("DELETE FROM News")
-    fun clearDb(): Completable
+    fun clearDb()
 
     @Query("SELECT * FROM News")
     fun getNews(): PagingSource<Int, NewsDb>

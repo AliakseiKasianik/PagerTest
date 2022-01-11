@@ -7,11 +7,11 @@ import clean.domain.repository.NewsDatabaseRepository
 import io.reactivex.rxjava3.core.Completable
 
 data class RoomNewsRepository(private val dao: NewsDao): NewsDatabaseRepository {
-    override fun insertNews(news: List<NewsDb>): Completable {
+    override fun insertNews(news: List<NewsDb>) {
         return dao.insertNews(news)
     }
 
-    override fun clearDb(): Completable {
+    override fun clearDb() {
         return dao.clearDb()
     }
 
