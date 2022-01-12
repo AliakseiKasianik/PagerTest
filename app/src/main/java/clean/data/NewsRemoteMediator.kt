@@ -1,18 +1,14 @@
 package clean.data
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.rxjava3.RxRemoteMediator
-import app.AppDatabase
 import clean.data.database.api.NewsDao
 import clean.data.database.api.RemoteKeysDao
 import clean.data.database.model.NewsDb
 import clean.data.database.model.RemoteKeys
 import clean.data.mappers.mapToNewsDb
-import clean.data.repository.NetworkNewsRepository
-import clean.domain.model.News
 import clean.domain.repository.NewsRepository
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -39,50 +35,50 @@ class NewsRemoteMediator(
                         remoteKeys?.nextKey?.minus(1) ?: STARTING_PAGE_NUMBER
                     }
                     LoadType.PREPEND -> {
-                        val remoteKeys = getRemoteKeyForFirstItem(state)/*
-                            ?: throw InvalidObjectException("Result is empty")*/
-                        Log.e("AAA", remoteKeys.toString() + "prepend")
+                        val remoteKeys = getRemoteKeyForFirstItem(state)
                         remoteKeys?.prevKey ?: INVALID_PAGE
                     }
                     LoadType.APPEND -> {
-                        val remoteKeys = getRemoteKeyForLastItem(state)/*
-                            ?: throw InvalidObjectException("Result is empty")*/
-                        Log.e("AAA", remoteKeys.toString() + "apend")
+                        val remoteKeys = getRemoteKeyForLastItem(state)
                         remoteKeys?.nextKey ?: INVALID_PAGE
                     }
                 }
             }.flatMap { page ->
                 if (page == INVALID_PAGE) {
-                    Log.e("QQQ", page.toString() + " page")
-                    Single.just(MediatorResult.Error(InvalidObjectException("cmkjsnkcjdsn-=")))
+                    Single.just(MediatorResult.Error(InvalidObjectException("Invalid page")))
                 } else {
                     networkRepo.getNews("Kotlin", page, state.config.pageSize)
                         .map { response ->
-                            Log.e("QQQ", response.toString() + " page")
-                            response.listNews.map { it.mapToNewsDb() } }
-                        .map { insertToDb(page, loadType, it) }
+                            insertToDb(
+                                page,
+                                loadType,
+                                response.listNews.map { it.mapToNewsDb() }
+                            )
+                        }
                         .map<MediatorResult> {
-                            Log.e("AAA"," adclsdc " + it.toString())
-                            MediatorResult.Success(endOfPaginationReached = it.isEmpty()) }
+                            MediatorResult.Success(endOfPaginationReached = it.isEmpty())
+                        }
                         .onErrorReturn {
-                            Log.e("AAA", it.toString())
-                            MediatorResult.Error(it) }
+                            MediatorResult.Error(it)
+                        }
                 }
             }
     }
 
 
-    private fun insertToDb(page: Int, loadType: LoadType, data: List<NewsDb>): List<NewsDb> {
-        Log.e("AAA",  " insert")
+    private fun insertToDb(
+        page: Int,
+        loadType: LoadType,
+        data: List<NewsDb>
+    ): List<NewsDb> {
         if (loadType == LoadType.REFRESH) {
-            Log.e("AAA", loadType.toString() + " loadType")
             remoteKeysDao.clearRemoteKeys()
             newsDao.clearDb()
         }
-        val prevKey = if (page == STARTING_PAGE_NUMBER) null else page - 1
+
+        val prevKey = if (page > STARTING_PAGE_NUMBER) page - 1 else null
         val nextKey = if (data.isEmpty()) null else page + 1
-        Log.e("AAA", prevKey.toString() + " prevKey")
-        Log.e("AAA", nextKey.toString() + " nextKey")
+
         val keys = data.map {
             RemoteKeys(repoId = it.newsId, prevKey = prevKey, nextKey = nextKey)
         }

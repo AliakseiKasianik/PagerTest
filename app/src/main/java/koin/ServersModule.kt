@@ -2,6 +2,7 @@ package koin
 
 import Const.API_KEY_HEADER
 import Const.NEWS_API_KEY
+import Const.NEWS_API_KEY_SECOND
 import Const.SERVER_URL
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
@@ -70,7 +71,7 @@ fun provideOkHttpClient(
 fun headerKeyInterceptor(): Interceptor =
     Interceptor { chain ->
         val newRequest = chain.request().newBuilder()
-            .addHeader(API_KEY_HEADER, NEWS_API_KEY)
+            .addHeader(API_KEY_HEADER, NEWS_API_KEY_SECOND)
             .build()
         chain.proceed(newRequest)
     }
